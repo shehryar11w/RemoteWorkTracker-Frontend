@@ -213,6 +213,84 @@
   gap: 14px;
 }
 
+.pairRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 14px;
+  align-items: start;
+  min-width: 0;
+}
+
+.sideStack {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  align-content: start;
+}
+
+.payrollMetrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.payrollMetric {
+  padding: 12px;
+  border-radius: 14px;
+  min-width: 0;
+}
+
+.goalSummaryCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 22%, var(--color-border));
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--dash-card-solid));
+}
+
+.goalCardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.goalCard {
+  display: grid;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--color-border);
+  background: var(--dash-card-subtle);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  min-width: 0;
+}
+
+.goalCard:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 40%, var(--color-border));
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.goalCard:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.goalCard .goalTitle {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.35;
+}
+
 .card {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
@@ -914,8 +992,10 @@
   }
 
   .stackTwo,
+  .pairRow,
   .splitCard,
-  .twoPaneCard {
+  .twoPaneCard,
+  .payrollMetrics {
     grid-template-columns: 1fr;
   }
 

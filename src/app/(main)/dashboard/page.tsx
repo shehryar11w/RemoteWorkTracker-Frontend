@@ -817,212 +817,228 @@ export default function DashboardPage() {
             </CardSection>
 
           <div className={styles.leftColumn}>
-            <div className={styles.stackTwo}>
-              <CardSection
-                title="Active Projects"
-                subtitle={`${projects.length} loaded for organization`}
-                icon="▣"
-                iconTone="linear-gradient(135deg, #0f766e, #0e7490)"
-              >
-                <div className={styles.sectionList}>
-                  {projects.slice(0, 8).map((project, idx) => {
-                    const tasksForProject = unwrapTasksListPayload(
-                      taskQueries[idx]?.data as { data?: Task[] | TaskListResponse } | undefined
-                    );
-                    const prog = projectProgressFromTasks(project, tasksForProject);
-                    const status = projectStatusLabel(project);
-                    const memberPayload = memberQueries[idx]?.data;
-                    const members =
-                      memberPayload && Array.isArray(memberPayload.data) ? memberPayload.data : [];
-                    const end = project.end_date
-                      ? new Date(project.end_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
-                      : '—';
-                    return (
-                      <article key={project.project_id} className={styles.projectItem}>
-                        <div className={styles.projectHeader}>
-                          <div className={styles.personRow}>
-                            <span className={styles.legendDot} style={{ background: '#0f766e', width: 10, height: 10 }} />
-                            <p className={styles.projectTitle}>{project.name}</p>
-                          </div>
-                          <span className={styles.badge}>{status}</span>
+            <CardSection
+              title="Active Projects"
+              subtitle={`${projects.length} loaded for organization`}
+              action="Manage"
+              actionHref="/projects"
+              icon="▣"
+              iconTone="linear-gradient(135deg, #0f766e, #0e7490)"
+            >
+              <div className={`${styles.sectionList} ${styles.cardScrollRegion}`}>
+                {projects.slice(0, 8).map((project, idx) => {
+                  const tasksForProject = unwrapTasksListPayload(
+                    taskQueries[idx]?.data as { data?: Task[] | TaskListResponse } | undefined
+                  );
+                  const prog = projectProgressFromTasks(project, tasksForProject);
+                  const status = projectStatusLabel(project);
+                  const memberPayload = memberQueries[idx]?.data;
+                  const members =
+                    memberPayload && Array.isArray(memberPayload.data) ? memberPayload.data : [];
+                  const end = project.end_date
+                    ? new Date(project.end_date).toLocaleDateString(undefined, {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })
+                    : '—';
+                  return (
+                    <article key={project.project_id} className={styles.projectItem}>
+                      <div className={styles.projectHeader}>
+                        <div className={styles.personRow}>
+                          <span
+                            className={styles.legendDot}
+                            style={{ background: '#0f766e', width: 10, height: 10 }}
+                          />
+                          <p className={styles.projectTitle}>{project.name}</p>
                         </div>
-                        <div className={styles.progressWrap}>
-                          <div className={styles.metaRow}>
-                            <span>Progress {tasksForProject.length ? '(tasks)' : '(schedule)'}</span>
-                            <span>{prog}%</span>
-                          </div>
-                          <div className={styles.progressBar}>
-                            <div className={styles.progressValue} style={{ width: `${prog}%` }} />
-                          </div>
+                        <span className={styles.badge}>{status}</span>
+                      </div>
+                      <div className={styles.progressWrap}>
+                        <div className={styles.metaRow}>
+                          <span>Progress {tasksForProject.length ? '(tasks)' : '(schedule)'}</span>
+                          <span>{prog}%</span>
                         </div>
-                        {members.length ? (
-                          <div className={styles.personRow} style={{ gap: 6, marginTop: 10, flexWrap: 'wrap' }}>
-                            {members.slice(0, 8).map((m) => (
-                              <div
-                                key={m.userId}
-                                title={m.name || m.userId}
-                                className={styles.avatar}
-                                style={{ width: 28, height: 28, fontSize: 11 }}
-                              >
-                                {initialsFromName(m.name || m.userId || '?')}
-                              </div>
-                            ))}
-                          </div>
-                        ) : null}
-                        <div className={styles.projectFoot}>
-                          <div className={styles.personRow}>
-                            <span>{end}</span>
-                          </div>
-                          <span>ID {project.project_id.slice(0, 8)}…</span>
+                        <div className={styles.progressBar}>
+                          <div className={styles.progressValue} style={{ width: `${prog}%` }} />
                         </div>
-                      </article>
-                    );
-                  })}
-                </div>
-              </CardSection>
-
-              <CardSection title="Goals & OKRs" subtitle="Goals for people in your org" icon="◎" iconTone="linear-gradient(135deg, #f59e0b, #fb923c)">
-                <div className={styles.twoPaneCard}>
-                  <div className={styles.miniColumn}>
-                    <p className={styles.metaLabel}>Objectives</p>
-                    {goalsListError ? (
-                      <p className={styles.subtleText} role="alert" style={{ marginBottom: 12 }}>
-                        Goals could not be loaded. Verify API access and organization scope.
-                      </p>
-                    ) : null}
-                    {goals.slice(0, 8).map((goal) => (
-                      <article key={goal.goalId || goal.title} className={styles.goalItem}>
-                        <div className={styles.goalHeader}>
-                          <p className={styles.goalTitle}>{goal.title}</p>
-                          <span className={(goal.progress || 0) >= 50 ? styles.okChip : styles.warnChip}>
-                            {(goal.progress || 0) >= 50 ? 'On Track' : 'At Risk'}
-                          </span>
-                        </div>
-                        <div className={styles.progressWrap}>
-                          <div className={styles.progressBar}>
+                      </div>
+                      {members.length ? (
+                        <div className={styles.personRow} style={{ gap: 6, marginTop: 10, flexWrap: 'wrap' }}>
+                          {members.slice(0, 8).map((m) => (
                             <div
-                              className={styles.progressValue}
-                              style={{
-                                width: `${goal.progress ?? 0}%`,
-                                background:
-                                  (goal.progress || 0) >= 50
-                                    ? 'linear-gradient(90deg, #10b981, #22c55e)'
-                                    : 'linear-gradient(90deg, #f59e0b, #f97316)',
-                              }}
-                            />
-                          </div>
-                          <div className={styles.goalFoot}>
-                            <span>{goal.progress ?? 0}%</span>
-                            <span>Due: {goal.deadline?.slice(0, 10) || '—'}</span>
-                          </div>
-                        </div>
-                      </article>
-                    ))}
-                  </div>
-
-                  <div className={styles.sideColumn}>
-                    <p className={styles.metaLabel}>Highlights</p>
-                    <div className={styles.card} style={{ boxShadow: 'none' }}>
-                      <div className={styles.cardBody} style={{ paddingTop: 12 }}>
-                        <div className={styles.sectionList}>
-                          {goals.slice(0, 4).map((goal) => (
-                            <div key={goal.goalId + 'kr'} className={styles.checkItem}>
-                              <span className={(goal.progress || 0) >= 100 ? styles.okChip : styles.warnChip}>
-                                {(goal.progress || 0) >= 100 ? '●' : '○'}
-                              </span>
-                              <span>{goal.title}</span>
+                              key={m.userId}
+                              title={m.name || m.userId}
+                              className={styles.avatar}
+                              style={{ width: 28, height: 28, fontSize: 11 }}
+                            >
+                              {initialsFromName(m.name || m.userId || '?')}
                             </div>
                           ))}
                         </div>
-                      </div>
-                    </div>
-
-                    <div className={styles.overallBox}>
-                      <div className={styles.projectHeader}>
+                      ) : null}
+                      <div className={styles.projectFoot}>
                         <div className={styles.personRow}>
-                          <span className={styles.legendDot} style={{ background: '#10b981', width: 10, height: 10 }} />
-                          <p className={styles.projectTitle}>Overall (avg progress)</p>
+                          <span>{end}</span>
                         </div>
-                        <span className={styles.okChip}>{goalProgressAvg}%</span>
+                        <span>ID {project.project_id.slice(0, 8)}…</span>
                       </div>
-                      <div className={styles.progressWrap} style={{ marginTop: 10 }}>
-                        <div className={styles.metricValueRow}>
-                          <span className={styles.metricValue}>{goalProgressAvg}%</span>
-                          <span className={styles.subtleText}>Across {goals.length} goals</span>
-                        </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </CardSection>
+
+            <CardSection
+              title="Goals & OKRs"
+              subtitle="Goals for people in your org"
+              action="Open"
+              actionHref="/goals"
+              icon="◎"
+              iconTone="linear-gradient(135deg, #f59e0b, #fb923c)"
+            >
+              <div className={styles.goalSummaryCard}>
+                <div>
+                  <p className={styles.metaLabel}>Overall avg progress</p>
+                  <div className={styles.metricValueRow} style={{ marginTop: 6 }}>
+                    <span className={styles.metricValue}>{goalProgressAvg}%</span>
+                    <span className={styles.subtleText}>Across {goals.length} goals</span>
+                  </div>
+                </div>
+                <div className={styles.progressWrap} style={{ flex: 1, minWidth: 140 }}>
+                  <div className={styles.progressBar} style={{ height: 8 }}>
+                    <div
+                      className={styles.progressValue}
+                      style={{
+                        width: `${goalProgressAvg}%`,
+                        background: 'linear-gradient(90deg, #0f766e, #14b8a6)',
+                      }}
+                    />
+                  </div>
+                </div>
+                <span className={goalProgressAvg >= 50 ? styles.okChip : styles.warnChip}>
+                  {goalProgressAvg >= 50 ? 'On track' : 'Needs focus'}
+                </span>
+              </div>
+
+              {goalsListError ? (
+                <p className={styles.subtleText} role="alert" style={{ marginBottom: 12 }}>
+                  Goals could not be loaded. Verify API access and organization scope.
+                </p>
+              ) : null}
+
+              <div className={styles.goalCardsGrid}>
+                {goals.slice(0, 8).map((goal) => {
+                  const progress = goal.progress ?? 0;
+                  const onTrack = progress >= 50;
+                  return (
+                    <Link
+                      key={goal.goalId || goal.title}
+                      href="/goals"
+                      className={styles.goalCard}
+                    >
+                      <div className={styles.goalHeader}>
+                        <p className={styles.goalTitle}>{goal.title}</p>
+                        <span className={onTrack ? styles.okChip : styles.warnChip}>
+                          {progress >= 100 ? 'Done' : onTrack ? 'On track' : 'At risk'}
+                        </span>
+                      </div>
+                      <div className={styles.progressWrap}>
                         <div className={styles.progressBar}>
                           <div
                             className={styles.progressValue}
-                            style={{ width: `${goalProgressAvg}%`, background: 'linear-gradient(90deg, #10b981, #22c55e)' }}
+                            style={{
+                              width: `${progress}%`,
+                              background: onTrack
+                                ? 'linear-gradient(90deg, #0f766e, #14b8a6)'
+                                : 'linear-gradient(90deg, #f59e0b, #f97316)',
+                            }}
                           />
                         </div>
+                        <div className={styles.goalFoot}>
+                          <span>{progress}%</span>
+                          <span>Due {goal.deadline?.slice(0, 10) || '—'}</span>
+                        </div>
                       </div>
-                    </div>
+                    </Link>
+                  );
+                })}
+              </div>
+              {!goals.length && !goalsListError ? (
+                <p className={styles.subtleText} style={{ marginTop: 10 }}>
+                  No goals yet for this organization.
+                </p>
+              ) : null}
+            </CardSection>
+
+            <div className={styles.pairRow}>
+              <CardSection
+                title="Payroll Summary"
+                subtitle={`${monthYm} (net pay + overtime)`}
+                action="Open"
+                actionHref="/payroll"
+                icon="⌁"
+                iconTone="linear-gradient(135deg, #10b981, #22c55e)"
+              >
+                <div className={styles.payrollMetrics}>
+                  <div className={styles.payrollMetric} style={{ background: 'linear-gradient(135deg, #10b981, #22c55e)' }}>
+                    <p className={styles.metaLabel} style={{ color: 'rgba(255,255,255,0.78)' }}>
+                      Total net
+                    </p>
+                    <p className={styles.metaValue} style={{ color: 'var(--dash-stat-text)', marginTop: 6 }}>
+                      {formatPkrCompact(payrollTotals.total)}
+                    </p>
+                  </div>
+                  <div className={styles.payrollMetric} style={{ background: 'linear-gradient(135deg, #f59e0b, #fb923c)' }}>
+                    <p className={styles.metaLabel} style={{ color: 'rgba(255,255,255,0.78)' }}>
+                      Overtime
+                    </p>
+                    <p className={styles.metaValue} style={{ color: 'var(--dash-stat-text)', marginTop: 6 }}>
+                      {formatPkrCompact(payrollTotals.overtime)}
+                    </p>
+                  </div>
+                  <div className={styles.payrollMetric} style={{ background: 'linear-gradient(135deg, #0f766e, #0e7490)' }}>
+                    <p className={styles.metaLabel} style={{ color: 'rgba(255,255,255,0.78)' }}>
+                      Rows
+                    </p>
+                    <p className={styles.metaValue} style={{ color: 'var(--dash-stat-text)', marginTop: 6 }}>
+                      {payrollRecords.length}
+                    </p>
                   </div>
                 </div>
-              </CardSection>
-            </div>
 
-            <div className={styles.stackTwo}>
-              <CardSection title="Payroll Summary" subtitle={`${monthYm} (net pay + overtime)`} icon="⌁" iconTone="linear-gradient(135deg, #10b981, #22c55e)">
-                <div className={styles.splitCard}>
-                  <div className={styles.sectionList}>
-                    <div className={styles.projectItem} style={{ background: 'linear-gradient(135deg, #10b981, #22c55e)' }}>
-                      <p className={styles.metaLabel} style={{ color: 'rgba(255,255,255,0.78)' }}>
-                        Total net (page)
-                      </p>
-                      <p className={styles.metaValue} style={{ color: 'var(--dash-stat-text)', marginTop: 8 }}>
-                        {formatPkrCompact(payrollTotals.total)}
-                      </p>
-                    </div>
-                    <div className={styles.projectItem} style={{ background: 'linear-gradient(135deg, #f59e0b, #fb923c)' }}>
-                      <p className={styles.metaLabel} style={{ color: 'rgba(255,255,255,0.78)' }}>
-                        Overtime
-                      </p>
-                      <p className={styles.metaValue} style={{ color: 'var(--dash-stat-text)', marginTop: 8 }}>
-                        {formatPkrCompact(payrollTotals.overtime)}
-                      </p>
-                    </div>
-                    <div className={styles.projectItem} style={{ background: 'linear-gradient(135deg, #2563eb, #06b6d4)' }}>
-                      <p className={styles.metaLabel} style={{ color: 'rgba(255,255,255,0.78)' }}>
-                        Rows
-                      </p>
-                      <p className={styles.metaValue} style={{ color: 'var(--dash-stat-text)', marginTop: 8 }}>
-                        {payrollRecords.length}
-                      </p>
-                    </div>
+                <div className={styles.paymentCard}>
+                  <div className={styles.paymentHeader}>
+                    <p className={styles.paymentTitle}>Recent payroll rows</p>
+                    <span className={styles.smallRow}>Month {monthYm}</span>
                   </div>
-
-                  <div className={styles.paymentCard}>
-                    <div className={styles.paymentHeader}>
-                      <p className={styles.paymentTitle}>Recent payroll rows</p>
-                      <span className={styles.smallRow}>Month {monthYm}</span>
-                    </div>
-                    <div className={`${styles.sectionList} ${styles.payrollRowsScroll}`}>
-                      {payrollRecords.slice(0, 5).map((payment, payIdx) => (
-                        <div
-                          key={payment.payrollId || `${payment.userId}-${payIdx}`}
-                          className={styles.projectItem}
-                          style={{ background: 'var(--dash-card-solid)' }}
-                        >
-                          <div className={styles.projectHeader}>
-                            <div>
-                              <p className={styles.projectTitle}>{payment.employeeName || payment.userId}</p>
-                              <p className={styles.subtleText}>{payment.month}</p>
-                            </div>
-                            <div style={{ textAlign: 'right' }}>
-                              <p className={styles.projectTitle}>{formatPkrCompact(payment.netPay)}</p>
-                              <p className={styles.okChip}>Net</p>
-                            </div>
+                  <div className={`${styles.sectionList} ${styles.payrollRowsScroll}`}>
+                    {payrollRecords.slice(0, 5).map((payment, payIdx) => (
+                      <div
+                        key={payment.payrollId || `${payment.userId}-${payIdx}`}
+                        className={styles.projectItem}
+                        style={{ background: 'var(--dash-card-solid)' }}
+                      >
+                        <div className={styles.projectHeader}>
+                          <div>
+                            <p className={styles.projectTitle}>{payment.employeeName || payment.userId}</p>
+                            <p className={styles.subtleText}>{payment.month}</p>
+                          </div>
+                          <div style={{ textAlign: 'right' }}>
+                            <p className={styles.projectTitle}>{formatPkrCompact(payment.netPay)}</p>
+                            <p className={styles.okChip}>Net</p>
                           </div>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))}
+                    {!payrollRecords.length ? (
+                      <p className={styles.subtleText}>No payroll rows for this month.</p>
+                    ) : null}
                   </div>
                 </div>
               </CardSection>
 
-              <div className={styles.stackTwo}>
+              <div className={styles.sideStack}>
                 <CardSection
                   title="Top Applications"
                   subtitle="Organization totals for today (UTC)"
@@ -1037,7 +1053,11 @@ export default function DashboardPage() {
                     ) : applicationBars.length ? (
                       <div className={styles.sectionList}>
                         {applicationBars.map((app) => (
-                          <div key={app.name} className={styles.projectItem} style={{ background: 'var(--dash-card-solid)' }}>
+                          <div
+                            key={app.name}
+                            className={styles.projectItem}
+                            style={{ background: 'var(--dash-card-solid)' }}
+                          >
                             <div className={styles.projectHeader}>
                               <p className={styles.projectTitle}>{app.name}</p>
                               <span className={styles.subtleText}>{app.time}</span>
@@ -1045,7 +1065,10 @@ export default function DashboardPage() {
                             <div className={styles.progressBar} style={{ marginTop: 10 }}>
                               <div
                                 className={styles.progressValue}
-                                style={{ width: `${app.percent}%`, background: `linear-gradient(90deg, ${app.tone}, ${app.tone})` }}
+                                style={{
+                                  width: `${app.percent}%`,
+                                  background: `linear-gradient(90deg, ${app.tone}, ${app.tone})`,
+                                }}
                               />
                             </div>
                           </div>
@@ -1061,7 +1084,7 @@ export default function DashboardPage() {
                   title="Productivity Trend"
                   subtitle="Org active hours by UTC day (month to date)"
                   icon="▁"
-                  iconTone="linear-gradient(135deg, #2563eb, #06b6d4)"
+                  iconTone="linear-gradient(135deg, #0f766e, #06b6d4)"
                 >
                   <div className={styles.progressWrap}>
                     <div className={`${styles.metaRow} ${styles.productivityTrendRow}`}>
@@ -1073,7 +1096,9 @@ export default function DashboardPage() {
                                 width: 16,
                                 height: `${Math.max(entry.hours * 12, 12)}px`,
                                 borderRadius: 999,
-                                background: entry.key.includes(String(new Date().getDate())) ? '#06b6d4' : '#2563eb',
+                                background: entry.key.includes(String(new Date().getDate()))
+                                  ? '#14b8a6'
+                                  : '#0f766e',
                               }}
                             />
                           </div>
